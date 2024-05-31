@@ -1,0 +1,9 @@
+spring:
+  application:
+    name: Ant
+
+server:
+  port: 8088
+
+openai:
+  api-key: ${OPENAI_API_KEY}
