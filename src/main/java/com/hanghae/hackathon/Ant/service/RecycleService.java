@@ -56,7 +56,7 @@ public class RecycleService {
         return "[{\"type\": \"text\"" +
                 ",\"text\": \"" + message + "\"}" +
                 ",\"{\"type\": \"image_url\"" +
-                    ",\"image_url\": {\"url\": \"<https://52.78.158.250:8088/testview>\"}\"}\"]\"";
+                    ",\"image_url\": {\"url\": \"<http://52.78.158.250:8088/testview>\"}\"}\"]\"";
 
     }
 
