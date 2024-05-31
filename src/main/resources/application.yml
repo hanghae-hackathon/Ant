@@ -9,6 +9,9 @@ thymeleaf:
   suffix: .html
   enabled: true
 
+file:
+  path: /home/ec2-user/file/
+
 server:
   port: 8088
 

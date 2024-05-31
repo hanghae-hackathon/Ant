@@ -13,8 +13,6 @@ public class ApiController {
 
     @GetMapping("/ask")
     public Object ask() {
-
-        service.getResult();
-        return "";
+        return service.getResult();
     }
 }
