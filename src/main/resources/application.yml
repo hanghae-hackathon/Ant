@@ -1,6 +1,9 @@
 spring:
   application:
     name: Ant
+  mvc:
+    view:
+      suffix: .html
 
 server:
   port: 8088
