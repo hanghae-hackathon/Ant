@@ -16,4 +16,4 @@ server:
   port: 8088
 
 openai:
-  api-key: ${OPENAI_API_KEY}
+  api-key: OPENAI_API_KEY
