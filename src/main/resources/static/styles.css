@@ -22,7 +22,7 @@ body{
 }
 
 .chat-app .chat {
-    margin-left: 280px;
+    /*margin-left: 280px;*/
     border-left: 1px solid #eaeaea
 }
 
@@ -207,6 +207,12 @@ body{
     content: " ";
     clear: both;
     height: 0
+}
+
+.previewClass {
+    width: 200px;
+    max_width: 40px;
+    height: auto;
 }
 
 @media only screen and (max-width: 767px) {

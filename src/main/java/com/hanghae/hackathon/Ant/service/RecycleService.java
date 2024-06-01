@@ -32,7 +32,7 @@ public class RecycleService {
     @Value("${aws.s3.bucket.url}")
     private String bucketUrl;
 
-    public void getResult() {
+    public String getResult() {
         OpenAiService service = new OpenAiService(apiKey);
 
         List<ChatMessage> messages = new ArrayList<>();
@@ -61,6 +61,7 @@ public class RecycleService {
         for (ChatCompletionChoice choice : choices) {
             System.out.println(choice.getMessage().getContent());
         }
+        return choices.get(0).getMessage().getContent();
     }
 
     public String imageB64(String imagePath) {
@@ -88,22 +89,23 @@ public class RecycleService {
     public String getAnswer(String reqInfo, MultipartFile attachFile) {
         OpenAiService service = new OpenAiService(apiKey);
         String content = "{\"type\": \"text\", \"text\": \"이 사진에 있는 물건이 재활용이 가능한지 알려주고 가능하다면 재활용 방법도 알려줘.\"}";
+        String gptModel = "gpt-4-vision-preview";
 
         if (reqInfo != null) {
-            content += ", {\"type\": \"text\", \"text\": " + reqInfo + "}";
+            content = "{\"type\": \"text\", \"text\": \"" + reqInfo + "\n 만약 이 질문이 분리수거 혹은 재활용과 관련된 질문이 아니면 '분리수거 혹은 재활용에 대한 질문을 해주세요.' 라고 대답해줘.\"}";
+            gptModel = "gpt-4o";
         }
 
         if (attachFile != null) {
             String fileUrl = uploadFile(attachFile);
-            content += ", {\"type\": \"image_url\", \"image_url\": {\"url\": " + fileUrl + "}}";
+            content += ", {\"type\": \"image_url\", \"image_url\": {\"url\": \"" + fileUrl + "\"}}";
         }
 
         List<ChatMessage> messages = new ArrayList<>();
         messages.add(new ChatMessage(ChatMessageRole.USER.value(), "[" + content + "]"));
 
         ChatCompletionRequest request = ChatCompletionRequest.builder()
-                                                             .model("gpt-4-vision-preview")
-//                                                             .model("gpt-4o")
+                                                             .model(gptModel)
                                                              .messages(messages)
 //                                                             .instructions(instructions)
                                                              .maxTokens(500)
