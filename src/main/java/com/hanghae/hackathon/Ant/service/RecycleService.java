@@ -1,5 +1,6 @@
 package com.hanghae.hackathon.Ant.service;
 
+import com.hanghae.hackathon.Ant.util.FileUtils;
 import com.theokanning.openai.completion.chat.ChatCompletionChoice;
 import com.theokanning.openai.completion.chat.ChatCompletionRequest;
 import com.theokanning.openai.completion.chat.ChatMessage;
@@ -7,6 +8,7 @@ import com.theokanning.openai.completion.chat.ChatMessageRole;
 import com.theokanning.openai.service.OpenAiService;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
+import org.springframework.web.multipart.MultipartFile;
 
 import java.io.File;
 import java.io.FileInputStream;
@@ -18,8 +20,17 @@ import java.util.List;
 @Service
 public class RecycleService {
 
+    private final FileUtils fileUtils;
+
+    public RecycleService(FileUtils fileUtils) {
+        this.fileUtils = fileUtils;
+    }
+
     @Value("${openai.api-key}")
     private String apiKey;
+
+    @Value("${aws.s3.bucket.url}")
+    private String bucketUrl;
 
     public void getResult() {
         OpenAiService service = new OpenAiService(apiKey);
@@ -65,5 +76,47 @@ public class RecycleService {
             e.printStackTrace();
             return null;
         }
+    }
+
+    public String uploadFile(MultipartFile attachFile) {
+        String fileKey = fileUtils.upload(attachFile);
+        String fileUrl = String.join("/", bucketUrl, fileKey);
+
+        return fileUrl;
+    }
+
+    public String getAnswer(String reqInfo, MultipartFile attachFile) {
+        OpenAiService service = new OpenAiService(apiKey);
+        String content = "{\"type\": \"text\", \"text\": \"이 사진에 있는 물건이 재활용이 가능한지 알려주고 가능하다면 재활용 방법도 알려줘.\"}";
+
+        if (reqInfo != null) {
+            content += ", {\"type\": \"text\", \"text\": " + reqInfo + "}";
+        }
+
+        if (attachFile != null) {
+            String fileUrl = uploadFile(attachFile);
+            content += ", {\"type\": \"image_url\", \"image_url\": {\"url\": " + fileUrl + "}}";
+        }
+
+        List<ChatMessage> messages = new ArrayList<>();
+        messages.add(new ChatMessage(ChatMessageRole.USER.value(), "[" + content + "]"));
+
+        ChatCompletionRequest request = ChatCompletionRequest.builder()
+                                                             .model("gpt-4-vision-preview")
+//                                                             .model("gpt-4o")
+                                                             .messages(messages)
+//                                                             .instructions(instructions)
+                                                             .maxTokens(500)
+                                                             .build();
+
+        List<ChatCompletionChoice> choices = service.createChatCompletion(request).getChoices();
+
+        StringBuilder sb = new StringBuilder();
+        for (ChatCompletionChoice choice : choices) {
+            sb.append(choice.getMessage().getContent());
+        }
+
+        System.out.println(sb);
+        return sb.toString();
     }
 }
