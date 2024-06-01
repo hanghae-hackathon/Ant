@@ -8,7 +8,11 @@ import com.theokanning.openai.service.OpenAiService;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Base64;
 import java.util.List;
 
 @Service
@@ -45,6 +49,21 @@ public class RecycleService {
 
         for (ChatCompletionChoice choice : choices) {
             System.out.println(choice.getMessage().getContent());
+        }
+    }
+
+    public String imageB64(String imagePath) {
+        File file = new File(imagePath);
+        try (FileInputStream imageInFile = new FileInputStream(file)) {
+            // Reading a file from file system
+            byte imageData[] = new byte[(int) file.length()];
+            imageInFile.read(imageData);
+
+            // Converting Image byte array into Base64 String
+            return Base64.getEncoder().encodeToString(imageData);
+        } catch (IOException e) {
+            e.printStackTrace();
+            return null;
         }
     }
 }
