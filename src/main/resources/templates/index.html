@@ -140,7 +140,7 @@
         });
 
     }
-
+    var imgIndex = 0;
     const imageFile = document.getElementById("imageFile");
     imageFile.addEventListener("change", function(e) {
 
@@ -150,15 +150,15 @@
         var ul_list = $('#chatUl');
         ul_list.append("<li class=\"clearfix\">\n" +
             "                                <div class=\"message other-message float-right\"> \n" +
-            "                                    <img id=\"preview\" class=\"previewClass\" src=\"./image/preview.jpg\">\n" +
+            "                                    <img id=\"preview" + imgIndex + "\" class=\"previewClass\" src=\"./image/preview.jpg\">\n" +
             "                                </div>\n" +
             "                            </li>");
 
         callAsk(formData);
 
         let image = document.querySelector('#imageFile');
-        let preview = document.querySelector('#preview');
-
+        let preview = document.querySelector('#preview' + imgIndex);
+        imgIndex++;
         let get_file = e.target.files;
 
         let reader = new FileReader();
