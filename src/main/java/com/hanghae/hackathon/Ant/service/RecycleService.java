@@ -1,20 +1,14 @@
 package com.hanghae.hackathon.Ant.service;
 
+import com.theokanning.openai.completion.chat.ChatCompletionChoice;
 import com.theokanning.openai.completion.chat.ChatCompletionRequest;
-import com.theokanning.openai.completion.chat.ChatFunctionCall;
 import com.theokanning.openai.completion.chat.ChatMessage;
 import com.theokanning.openai.completion.chat.ChatMessageRole;
-import com.theokanning.openai.image.CreateImageRequest;
-import com.theokanning.openai.service.FunctionExecutor;
 import com.theokanning.openai.service.OpenAiService;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.IOException;
 import java.util.ArrayList;
-import java.util.Base64;
 import java.util.List;
 
 @Service
@@ -23,56 +17,34 @@ public class RecycleService {
     @Value("${openai.api-key}")
     private String apiKey;
 
-    public String getResult() {
+    public void getResult() {
         OpenAiService service = new OpenAiService(apiKey);
-//        FunctionExecutor functionExecutor = new FunctionExecutor(functionList);
-        String filePath = "C:\\Users\\taehan\\Desktop\\project\\Ant\\src\\main\\resources\\static\\img\\hot.jpg";
 
         List<ChatMessage> messages = new ArrayList<>();
-        ChatMessage userMessage = new ChatMessage(ChatMessageRole.USER.value(), getPayload("이 사진 속 사물에 대해 설명해줘.", imageB64(filePath)));
-        messages.add(userMessage);
-        ChatCompletionRequest chatCompletionRequest = ChatCompletionRequest
-                .builder()
-                .model("gpt-4o-2024-05-13")
-                .messages(messages)
-//                .functions(functionExecutor.getFunctions())
-//                .functionCall(new ChatCompletionRequest.ChatCompletionRequestFunctionCall("auto"))
-                .maxTokens(256)
-                .build();
+        messages.add(new ChatMessage(ChatMessageRole.USER.value(),
+                "[{\"type\": \"text\", \"text\": \"이 사진에 있는 물건이 재활용이 가능한지 알려주고 가능하다면 재활용 방법도 알려줘\"}," +
+                        " {\"type\": \"image_url\", \"image_url\":" +
+                        " {\"url\": \"https://ko.hz-bottle.com/uploads/202236888/olive-oil-glass-bottle-recycle03172358844.jpg\"}}]"));
 
-        ChatMessage responseMessage = service.createChatCompletion(chatCompletionRequest).getChoices().get(0).getMessage();
-//        ChatFunctionCall functionCall = responseMessage.getFunctionCall(); // might be null, but in this case it is certainly a call to our 'get_weather' function.
+//        String instructions = "나는 분리수거 전문가야. \n" +
+//                "제품명이나 바코드, 분리수거 표시를 보면 바로 어떻게 재활용이 가능한지 아닌지 알 수 있어. \n" +
+//                "제품의 설명이나 사진을 받으면 가장 먼저 이 물건이 재활용 가능한 지부터 말해줘야해.\n" +
+//                "그리고나서 재활용이 가능하다면 해당 제품의 재활용 방법에 대해 요약해서 설명해줄거야.\n" +
+//                "모든 설명은 보기 좋게 부호와 단락 나누기를 활용해 보여주기로 했어.\n" +
+//                "그리고 확실히 구분할 수 없는 제품 사진이나 설명이 있다면, 좀 더 정확한 정보를 다시 요구해야해.";
 
-//        ChatMessage functionResponseMessage = functionExecutor.executeAndConvertToMessageHandlingExceptions(functionCall);
-//        messages.add(response);
-        System.out.println(responseMessage.getContent());
-        return responseMessage.getContent();
+        ChatCompletionRequest request = ChatCompletionRequest.builder()
+                                                             .model("gpt-4-vision-preview")
+//                                                             .model("gpt-4o")
+                                                             .messages(messages)
+//                                                             .instructions(instructions)
+                                                             .maxTokens(200)
+                                                             .build();
 
+        List<ChatCompletionChoice> choices = service.createChatCompletion(request).getChoices();
 
-
-    }
-
-    public String getPayload(String message, String imageBase64) {
-        return "[{\"type\": \"text\"" +
-                ",\"text\": \"" + message + "\"}" +
-                ",\"{\"type\": \"image_url\"" +
-                    ",\"image_url\": {\"url\": \"<https://52.78.158.250:8088/testview>\"}\"}\"]\"";
-
-    }
-
-    public String imageB64(String imagePath) {
-        File file = new File(imagePath);
-        try (FileInputStream imageInFile = new FileInputStream(file)) {
-            // Reading a file from file system
-            byte imageData[] = new byte[(int) file.length()];
-            imageInFile.read(imageData);
-
-            // Converting Image byte array into Base64 String
-            return Base64.getEncoder().encodeToString(imageData);
-        } catch (IOException e) {
-            e.printStackTrace();
-            return null;
+        for (ChatCompletionChoice choice : choices) {
+            System.out.println(choice.getMessage().getContent());
         }
     }
-
 }
