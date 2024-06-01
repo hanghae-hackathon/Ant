@@ -1,0 +1,28 @@
+spring:
+  application:
+    name: Ant
+
+thymeleaf:
+  cache: false
+  check-template-location: true
+  prefix: classpath:/templates/
+  suffix: .html
+  enabled: true
+
+file:
+  path: /home/ec2-user/file/
+
+server:
+  port: 8088
+
+openai:
+  api-key: OPENAI_API_KEY
+
+aws:
+  credentials:
+    access-key-id: AWS_ACCESS_KEY
+    secret-access-key: AWS_SECRET_KEY
+  s3:
+    bucket:
+      name: AWS_S3_BUCKET_NAME
+      url: AWS_S3_BUCKET_URL
